@@ -13,9 +13,12 @@ boxes = cross(rows, cols)
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC', 'DEF', 'GHI') for cs in ('123', '456', '789')]
+
+# The 2 diagonal units form an X on the sudoku board
 diagonal_units = [[''.join(x) for x in zip(rows, cols)],
                   [''.join(x) for x in zip(rows, reversed(cols))]]
 
+# We simply add the new units to the units list
 unit_list = row_units + column_units + square_units + diagonal_units
 
 units = dict((s, [u for u in unit_list if s in u]) for s in boxes)
@@ -42,21 +45,26 @@ def naked_twins(values):
         the values dictionary with the naked twins eliminated from peers.
     """
     for unit in unit_list:
+        # Every box with 2 digits in the unit
         doubles = list(filter(lambda x: len(x) == 2, [values[y] for y in unit]))
-        count = dict.fromkeys(set(doubles), 0)
 
+        # Every twin in the unit (pairs with the same 2 digits)
+        count = dict.fromkeys(set(doubles), 0)
         for d in doubles:
             count[d] += 1
         twins = {k: v for k, v in count.items() if v == 2}.keys()
 
+        # Remove twins' digits from other boxes in the unit
         for twin in twins:
             for box in unit:
-                if values[box] != twin:
-                    digits = [x for x in twin]
-                    assign_value(values, box, values[box].replace(digits[0], '').replace(digits[1], ''))
+                if values[box] != twin and len(values[box]) != 1:
+                    new_value = values[box]
+                    for digit in twin:
+                        new_value = new_value.replace(digit, '')
+
+                    assign_value(values, box, new_value)
 
     return values
-
 
 
 def grid_values(grid):
