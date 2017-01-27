@@ -41,7 +41,22 @@ def naked_twins(values):
     Returns:
         the values dictionary with the naked twins eliminated from peers.
     """
+    for unit in unit_list:
+        doubles = list(filter(lambda x: len(x) == 2, [values[y] for y in unit]))
+        count = dict.fromkeys(set(doubles), 0)
+
+        for d in doubles:
+            count[d] += 1
+        twins = {k: v for k, v in count.items() if v == 2}.keys()
+
+        for twin in twins:
+            for box in unit:
+                if values[box] != twin:
+                    digits = [x for x in twin]
+                    assign_value(values, box, values[box].replace(digits[0], '').replace(digits[1], ''))
+
     return values
+
 
 
 def grid_values(grid):
@@ -86,7 +101,7 @@ def eliminate(values):
     for box in solved_values:
         digit = values[box]
         for peer in peers[box]:
-            values[peer] = values[peer].replace(digit, '')
+            assign_value(values, peer, values[peer].replace(digit, ''))
     return values
 
 
@@ -95,7 +110,7 @@ def only_choice(values):
         for digit in '123456789':
             dplaces = [box for box in unit if digit in values[box]]
             if len(dplaces) == 1:
-                values[dplaces[0]] = digit
+                assign_value(values, dplaces[0], digit)
     return values
 
 
